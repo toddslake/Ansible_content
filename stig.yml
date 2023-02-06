@@ -1,0 +1,13 @@
+---
+
+- name: Apply DISA security Technical Implementation Guides
+  hosts: all
+  become: yes
+  gather_facts: yes
+  tasks:
+    - name: Determine OS version and apply STIG template
+      include_role:
+        name: rhel7STIG
+      when:
+        - ansible_facts['distribution'] == "RedHat"
+        - ansible_facts['distribution_major_version'] == "7"
