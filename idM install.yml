@@ -1,0 +1,45 @@
+---
+- name: Install and configure Red Hat IdM
+  hosts: idm-server
+  become: yes
+
+  tasks:
+    - name: Install IdM packages
+      yum:
+        name:
+          - ipa-server
+          - ipa-server-dns
+          - ipa-client
+          - oddjob-mkhomedir
+        state: present
+
+    - name: Configure IdM server
+      ipa_server_install:
+        domain: example.com
+        realm: EXAMPLE.COM
+        admin_password: MySecretPassword123
+        ds_password: AnotherSecretPassword456
+        hostname: idm-server.example.com
+        ip_address: 192.168.1.10
+        setup_dns: true
+        auto_forwarders: true
+        allow_zone_overlap: true
+      register: ipa_server_install_result
+
+    - name: Add IdM client
+      ipa_client:
+        domain: example.com
+        server: idm-server.example.com
+        realm: EXAMPLE.COM
+        admin_password: MySecretPassword123
+        hostname: client1.example.com
+        force_join: yes
+      register: ipa_client_result
+
+    - name: Display IdM setup result
+      debug:
+        var: ipa_server_install_result
+
+    - name: Display IdM client setup result
+      debug:
+        var: ipa_client_result
